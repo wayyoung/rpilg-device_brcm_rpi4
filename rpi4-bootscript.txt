@@ -1,0 +1,42 @@
+ab_select active_slot mmc 0:7
+echo active_slot: ${active_slot}
+fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
+#fatwrite mmc 0:1 ${fdt_addr} gold.dtb 46000
+if test ${active_slot} = a; then 
+    setenv bootargs "${bootargs} androidboot.storage=rpi4_a androidboot.slot_suffix=_a";
+    kernel_file=zImage;
+    bcb load 0 7;
+    if bcb test command = boot-recovery; then
+        echo "factory mode";
+        ramdisk_file=ramdisk-recovery.img;
+    else
+        ramdisk_file=ramdisk.img;
+    fi;
+    dtb_file=bcm2711-rpi-4-b.dtb;
+else if test ${active_slot} = b; then
+    setenv bootargs "${bootargs} androidboot.storage=rpi4_b androidboot.slot_suffix=_b";
+    kernel_file=zImage_b;
+    bcb load 0 7;
+    if bcb test command = boot-recovery; then
+        echo "factory mode";
+        ramdisk_file=ramdisk-recovery.img;
+    else
+        ramdisk_file=ramdisk_b.img;
+    fi;
+    dtb_file=bcm2711-rpi-4-b.dtb;
+fi;fi
+fatload mmc 0:1 ${kernel_addr_r} ${kernel_file}
+fatload mmc 0:1 ${ramdisk_addr_r} ${ramdisk_file}
+setenv ramdisksize $filesize
+echo ramdisksize:${ramdisksize}
+fatload mmc 0:1 ${fdt_addr_r} ${dtb_file}
+setenv fdtsize $filesize
+echo fdtsize:${fdtsize}
+fdt addr ${fdt_addr_r}
+fdt resize 4096
+setexpr fdtovaddr ${fdt_addr_r} + 0xF0000
+load mmc 0:1 ${fdtovaddr} /overlays/rpi-backlight.dtbo && fdt apply ${fdtovaddr}
+load mmc 0:1 ${fdtovaddr} /overlays/rpi-ft5406.dtbo && fdt apply ${fdtovaddr}
+#fatwrite mmc 0:1 ${fdt_addr_r} my.dtb 46000
+#bootm ${kernel_addr_r} ${ramdisk_addr_r}:${ramdisksize} ${fdt_addr_r}
+bootz ${kernel_addr_r} ${ramdisk_addr_r}:${ramdisksize} ${fdt_addr_r}

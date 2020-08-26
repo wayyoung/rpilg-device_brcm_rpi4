@@ -133,3 +133,11 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.host.xml:vendor/etc/permissions/android.hardware.usb.host.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:vendor/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/tablet_core_hardware.xml:vendor/etc/permissions/tablet_core_hardware.xml
+
+# bootctrl HAL
+PRODUCT_PACKAGES += \
+    bootctrl.bcb \
+    bootctl \
+    android.hardware.boot@1.0 \
+    android.hardware.boot@1.0-impl \
+    android.hardware.boot@1.0-service

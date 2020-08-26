@@ -7,7 +7,8 @@ on init
 
 on fs
     mkdir /boot
-    mount_all /fstab.rpi4
+    #mkdir /misc
+    mount_all /fstab.${ro.boot.storage}
 
 on post-fs
     # Allow writing to the kernel trace log.
@@ -49,6 +50,9 @@ on boot
 
 on property:ro.revision=*
     start btuart
+
+on property:sys.boot_completed=1
+    exec - system system -- /system/bin/bootctl mark-boot-successful
 
 service btuart /vendor/bin/btuart /dev/ttyAMA0 bcm43xx 3000000 flow - ${ro.serialno}
     user bluetooth
